@@ -71,7 +71,7 @@
 
         var list = [];
 
-        fetch("/wordlist.csv")
+        fetch("wordlist.csv")
             .then(response => response.text())
             .then(text => {
                 const lines = text.split('\n').slice(1);
