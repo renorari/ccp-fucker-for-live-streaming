@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(0deg, #ffffff, #c8c8c8) no-repeat center center fixed;
+            font-family: "Ma Shan Zheng", cursive;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff40;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0.125rem 0.25rem #7f7f7f40;
+        }
+
+        #keyword {
+            font-size: 5em;
+            color: rgb(0, 0, 0);
+            text-align: center;
+        }
+
+        #meaning {
+            font-size: 2em;
+            text-align: center;
+            margin-top: 0.5rem;
+            background: linear-gradient(0deg, #3a9257, #33664d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <span id="keyword">
+            你好中国
+        </span>
+        <span id="meaning">
+            hello, China
+        </span>
+    </div>
+
+    <script>
+        const keyword = document.getElementById('keyword');
+        const meaning = document.getElementById('meaning');
+
+        var list = [];
+
+        fetch("/wordlist.csv")
+            .then(response => response.text())
+            .then(text => {
+                const lines = text.split('\n').slice(1);
+                const words = lines.map(line => line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(word => word.replace(/"/g, '')));
+                words.forEach(word => {
+                    list.push({
+                        keyword: word[0],
+                        meaning: word[2] != "" ? word[2] : word[1]
+                    });
+                });
+                console.log(list);
+                getRandomWord();
+            });
+        
+            function getRandomWord() {
+                const randomIndex = Math.floor(Math.random() * list.length);
+                const randomWord = list[randomIndex];
+                keyword.textContent = randomWord.keyword;
+                meaning.textContent = randomWord.meaning;
+
+                const msg = new SpeechSynthesisUtterance(randomWord.keyword);
+                msg.lang = 'zh-CN';
+                window.speechSynthesis.speak(msg);
+                msg.addEventListener('end', () => {
+                    setTimeout(getRandomWord, 500);
+                });
+            }
+
+            document.addEventListener('click', () => {
+                window.speechSynthesis.cancel();
+                getRandomWord();
+            });
+    </script>
+</body>
+
+</html>
